@@ -25,7 +25,7 @@ func handleConn(c net.Conn, timeZone string) {
 		t = time.Now()
 		_, err = io.WriteString(c, timeZone+": "+t.Format("15:04:05\n"))
 		if err != nil {
-			return // e.g., client disconnected
+			return
 		}
 		time.Sleep(1 * time.Second)
 	}
@@ -68,10 +68,10 @@ func main() {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Print(err) // e.g., connection aborted
+			log.Print(err)
 			continue
 		}
-		go handleConn(conn, tz) // handle connections concurrently
+		go handleConn(conn, tz)
 	}
 
 }
