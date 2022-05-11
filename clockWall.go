@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -10,20 +10,10 @@ import (
 	"time"
 )
 
-func (r *reloj) mustCopy(dst io.Writer, src io.Reader) {
-	//srcString := reader2string(src)
-	//output := r.lugar + ": " + srcString
-
+func mustCopy(dst io.Writer, src io.Reader) {
 	if _, err := io.Copy(dst, src); err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Fprintf(dst, "%s\n", output)
-}
-
-func reader2string(src io.Reader) string {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(src)
-	return buf.String()
 }
 
 type reloj struct {
@@ -31,9 +21,18 @@ type reloj struct {
 }
 
 func main() {
+	if len(os.Args) == 1 {
+		fmt.Println("Introduzca al menos una timezone y su respectivo localhost")
+		os.Exit(0)
+	}
+
 	var relojes []reloj
 	for _, parametro := range os.Args[1:] {
 		info := strings.Split(parametro, "=")
+		if len(info) == 1 {
+			fmt.Println("Example of expected argument: Tokyo=localhost:3030")
+			os.Exit(0)
+		}
 		relojes = append(relojes, reloj{info[0], info[1]})
 	}
 	for _, r := range relojes {
@@ -42,7 +41,7 @@ func main() {
 			log.Fatal(err)
 		}
 		defer conn.Close()
-		go r.mustCopy(os.Stdout, conn)
+		go mustCopy(os.Stdout, conn)
 	}
 	for {
 		time.Sleep(1 * time.Second)
